@@ -158,6 +158,7 @@
             <zipfileset dir="${proj.dir}" prefix="nbproject" />
             <include name="build.xml" />
             <include name="LICENSE.txt" />
+            <include name="README.txt" />
             <include name="releasenotes.txt" />
         </jar>
     </target>
