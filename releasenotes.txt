@@ -1,0 +1,24 @@
+Release Notes
+
+0.4
+---
+Fixes array index bug while reading AOL 9 Filing Cabinet.
+
+0.3
+---
+Specifies Main-Class attribute in jar manifest for easier startup.
+Displays toolbar buttons for some menu items.
+Displays main window using system look-and-feel.
+
+0.2
+---
+Exports emails to mbox + toc files; enables imports into Outlook Express.
+Displays AOL 5 address book items and groups.
+Allows email text to be copied to clipboard.
+Remembers last export directory.
+Fixes bug where zero entries in the cabinet index were skipped.
+MailToMbox console program outputs message if argument is not cabinet file.
+
+0.1
+---
+Initial release.

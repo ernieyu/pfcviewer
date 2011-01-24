@@ -1,0 +1,165 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!-- Written to assume that classpath is rooted in the current directory. -->
+<!-- So this should be OK if you make this script in the root of a filesystem. -->
+<!-- If not, you may prefer to adjust the basedir, or move some directories around. -->
+<!-- The idea is that both Ant and NetBeans have to know what the package root is -->
+<!-- for the classes in your application. -->
+<project name="pfcview" default="compile" basedir=".">
+
+    <!-- You can set up any variables you want used throughout the script here. -->
+    <property name="build.dir" location="build" />
+    <property name="dist.dir"  location="dist" />
+    <property name="doc.dir"   location="doc" />
+    <property name="lib.dir"   location="lib" />
+    <property name="proj.dir"  location="nbproject" />
+    <property name="src.dir"   location="src" />
+    
+    <property name="dist.jar"   value="${ant.project.name}.jar" />
+    <property name="src.jar"    value="${ant.project.name}-src.jar" />
+    <property name="main.class" value="PfcViewer" />
+
+    <!-- Define base classpath -->
+    <path id="base.classpath">
+        <pathelement location="${build.dir}" />
+    </path>
+
+    <target name="init" description="Initializes build">
+        <mkdir dir="${build.dir}" />
+        <mkdir dir="${dist.dir}" />
+        <mkdir dir="${doc.dir}" />
+    </target>
+
+    <target name="clean" depends="init" description="Clean all build products">
+        <!-- Delete compiled classes -->
+        <delete includeEmptyDirs="true" failonerror="false">
+            <fileset dir="${build.dir}" includes="**/*" />
+        </delete>
+        
+        <!-- Delete previously built jar files -->
+        <delete includeEmptyDirs="true" failonerror="false">
+            <fileset dir="${dist.dir}" includes="**/*" />
+        </delete>
+        
+        <!-- Delete generated javadoc files -->
+        <delete includeEmptyDirs="true" failonerror="false">
+            <fileset dir="${doc.dir}" includes="**/*" />
+        </delete>
+    </target>
+
+    <target name="compile" depends="init" description="Compile all classes">
+        <!-- Compile all java classes -->
+        <javac debug="true" deprecation="true" 
+            destdir="${build.dir}" 
+            srcdir="${src.dir}"
+            source="1.4"
+            target="1.4"
+            includes="**/*.java">
+            <classpath refid="base.classpath" />
+        </javac>
+        
+        <!-- Copy associated image files to build directory -->
+        <copy todir="${build.dir}">
+            <fileset dir="${src.dir}">
+                <include name="**/*.gif" />
+                <include name="**/*.png" />
+            </fileset>
+        </copy>
+    </target>
+
+    <target name="jar" depends="compile" description="Package into jar file">
+        <!-- Delete previously built jar file -->
+        <delete file="${dist.dir}/${dist.jar}" />
+        
+        <!-- Create jar file with classes, images, and manifest -->
+        <jar destfile="${dist.dir}/${dist.jar}" 
+             basedir="${build.dir}" 
+             compress="true" 
+             includes="**/*.class,**/*.gif,**/*.png">
+            <manifest>
+                <attribute name="Main-Class" value="${main.class}" />
+            </manifest>
+        </jar>
+    </target>
+
+    <target name="all" depends="jar" description="Rebuild all files">
+        <echo message="Application built."/>
+    </target>
+<!--
+    <target name="test" depends="all" description="Rebuild and execute.">
+        <java classname="com.foo.Main" failonerror="true" fork="true">
+            <classpath>
+                <pathelement location="."/>
+            </classpath>                    -->
+            <!-- Pass some args, perhaps: 
+            <arg value="-myfile"/>          -->
+            <!-- Will be given as an absolute path: 
+            <arg file="myfile.txt"/>
+        </java>
+    </target>
+-->
+    <target name="run" depends="compile" description="Executes the application">
+        <java classname="${main.class}" fork="true">
+            <classpath refid="base.classpath" />
+        </java>
+    </target>
+    
+    <target name="profile" depends="compile" description="Profile Project">
+        <fail unless="netbeans.home">This target can only run inside NetBeans</fail>
+
+        <nbprofiledirect>
+            <classpath>
+                <pathelement path="${build.dir}" />
+            </classpath>
+        </nbprofiledirect>
+        
+        <java classname="PfcViewer" fork="true">
+            <classpath>
+                <pathelement path="${build.dir}" />
+            </classpath>
+            <jvmarg value="${profiler.info.jvmargs.agent}" />
+        </java>
+    </target>
+
+    <target name="javadoc" depends="init" description="Generate API javadoc">
+        <!-- Delete old javadoc files -->
+        <delete includeEmptyDirs="true" failonerror="false">
+            <fileset dir="${doc.dir}" includes="**/*" />
+        </delete>
+
+        <!-- Generate javadoc files -->
+        <javadoc sourcepath="${src.dir}"
+                 destdir="${doc.dir}" 
+                 overview="${src.dir}/overview.html"
+                 doctitle="PFC Viewer API"
+                 windowtitle="PFC Viewer API"
+                 header="&lt;b&gt;PFC Viewer&lt;/b&gt;">
+            <fileset dir="${src.dir}">
+                <include name="*.java" />
+            </fileset>
+            <packageset dir="${src.dir}">
+                <include name="pfc/cab/**" />
+                <include name="pfc/export/**" />
+                <include name="pfc/images/**" />
+                <include name="pfc/view/**" />
+            </packageset>
+        </javadoc>
+    </target>
+
+    <target name="dist" depends="jar" description="Package source files">
+        <!-- Delete previously built jar file -->
+        <delete file="${dist.dir}/${src.jar}" />
+        
+        <!-- Create jar file with project and source files -->
+        <jar destfile="${dist.dir}/${src.jar}" 
+             basedir="." 
+             compress="true">
+            <zipfileset dir="${src.dir}" prefix="src" excludes="**/*.form" />
+            <zipfileset dir="${proj.dir}" prefix="nbproject" />
+            <include name="build.xml" />
+            <include name="LICENSE.txt" />
+            <include name="releasenotes.txt" />
+        </jar>
+    </target>
+
+</project>
