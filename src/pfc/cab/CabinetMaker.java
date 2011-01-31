@@ -38,7 +38,7 @@ public class CabinetMaker implements Runnable {
     
     public static final String CABFILE_ID = "AOLVM100";
 
-    private String fileName;
+    RandomAccessFile pfcFile = null;
     private Cabinet cabinet;
     private int progressPct;
     private JProgressBar progressBar;
@@ -47,10 +47,10 @@ public class CabinetMaker implements Runnable {
 
     /**
      *  Constructor.
-     *  @param name cabinet file name
+     *  @param file cabinet file
      */
-    public CabinetMaker(String name) {
-        fileName = name;
+    public CabinetMaker(RandomAccessFile file) {
+        pfcFile = file;
         cabinet = null;
         progressPct = 0;
         progressBar = null;
@@ -102,15 +102,9 @@ public class CabinetMaker implements Runnable {
      *  Cabinet object.
      */
     public void run() {
-
-        RandomAccessFile pfcFile = null;
-
         try {
             // Create new Cabinet object.
             cabinet = new Cabinet();
-
-            // Open personal filing cabinet for read-only access
-            pfcFile = new RandomAccessFile(fileName, "r");
 
             // Read first 8 bytes; should = AOLVM100.
             pfcFile.seek(0);
@@ -206,13 +200,6 @@ public class CabinetMaker implements Runnable {
         }
         catch (CabinetException cex) {
             exception = cex;
-        }
-        finally {
-            // Close cabinet file.
-            if (pfcFile != null) {
-                try { pfcFile.close(); }
-                catch (IOException iox) { exception = iox; }
-            }
         }
 
         // Set progress bar to completion, and close dialog.

@@ -304,6 +304,7 @@ public class PfcViewFrame extends javax.swing.JFrame {
     }
     
     // Custom variables
+    private RandomAccessFile pfcFile;
     private Cabinet cabinet;
     private CabinetTableModel tableModel;
     private File lastExportDir = new File(System.getProperty("user.dir"));
@@ -394,12 +395,22 @@ public class PfcViewFrame extends javax.swing.JFrame {
          */
         public void openCabinetFile(String filename) {
             jTextStatus.setText("Reading cabinet file " + filename);
-        
+
+            // Open the cabinet file in read-only mode
+            try {
+                pfcFile = new RandomAccessFile(filename, "r");
+            } catch (FileNotFoundException ex) {
+                jOptionPane1.showMessageDialog(PfcViewFrame.this, ex.toString(),
+                        "Open Cabinet", JOptionPane.ERROR_MESSAGE);
+                jTextStatus.setText("Could not read cabinet file " + filename);
+                return;
+            }
+
             // Create progress dialog.
             ProgressDialog dialog = new ProgressDialog(PfcViewFrame.this, true);
         
             // Create CabinetMaker and start thread to read cabinet file.
-            CabinetMaker maker = new CabinetMaker(filename);
+            CabinetMaker maker = new CabinetMaker(pfcFile);
             maker.setProgressBar(dialog.getProgressBar());
             maker.setProgressDialog(dialog);
             Thread thread = new Thread(maker);
@@ -457,6 +468,12 @@ public class PfcViewFrame extends javax.swing.JFrame {
             cabinet = null;
             jTreeFolders.setModel(null);
             tableModel.setCabinet(null);
+            // Close cabinet file.
+            if (pfcFile != null) {
+                try {
+                    pfcFile.close();
+                } catch (IOException iox) {}
+            }
             enableMenuItems();
         }
     }
