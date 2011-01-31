@@ -71,8 +71,17 @@ public class MailToMbox {
      *  object.
      */
     private void openCabinet(String pfcName) {
+        // Open PFC file for reading
+        RandomAccessFile pfcFile = null;
+        try {
+            pfcFile = new RandomAccessFile(pfcName, "r");
+        } catch (FileNotFoundException ex) {
+            System.err.println("Could not read cabinet file " + pfcName);
+            System.exit(1);
+        }
+
         // Create cabinet maker and start thread to read file.
-        CabinetMaker maker = new CabinetMaker(pfcName);
+        CabinetMaker maker = new CabinetMaker(pfcFile);
         Thread thread = new Thread(maker);
         thread.start();
         
