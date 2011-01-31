@@ -147,23 +147,8 @@ public class CabinetMaker implements Runnable {
                 pfcFile.seek(i);
                 int cabAddr = IntUtil.reverseInt(pfcFile.readInt());
 
-                byte[] byteBuffer;
-                if (cabAddr != 0) {
-                    // Get item length.
-                    pfcFile.seek(cabAddr + 4);
-                    int length = IntUtil.reverseInt(pfcFile.readInt());
-
-                    // Read entire item into byte array.
-                    byteBuffer = new byte[length];
-                    pfcFile.read(byteBuffer);
-                }
-                else {
-                    // Create empty byte array for zero entry.
-                    byteBuffer = new byte[4];
-                }
-
                 // Create cabinet item.
-                CabinetItem item = new CabinetItem(byteBuffer);
+                CabinetItem item = new CabinetItem(pfcFile, cabAddr);
                 item.setIndex(itemCount++);
                 item.setAddress(cabAddr);
 

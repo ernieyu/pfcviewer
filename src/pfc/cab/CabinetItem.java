@@ -22,6 +22,9 @@
 
 package pfc.cab;
 
+import java.io.IOException;
+import java.io.RandomAccessFile;
+
 /**
  *  Represents an entry in the Filing Cabinet.  All entries are either
  *  envelopes or data records.  All envelopes are 134 bytes long, and 
@@ -56,11 +59,11 @@ public class CabinetItem {
 
     private int index;              // position in index table
     private int address;            // record address in cabinet
+    private int length;             // record length
     private int type;               // record type
     private boolean envelope;       // true if record is envelope
     private boolean folder;         // true if record is folder
     private boolean sysFolder;      // true if record is system folder
-    private byte[] content;         // record content
     private byte flags;             // mail message flags
 
     // Pointers to other records.
@@ -70,12 +73,21 @@ public class CabinetItem {
     private int parent;             // pointer to parent envelope
     private int child;              // pointer to child envelope
 
+    // Reference to PFC file for future reads
+    // This is used instead of storing the raw record content to save memory.
+    private RandomAccessFile pfcFile;
+
     /**
      *  Constructor.
-     *  @param array contents of cabinet item
+     *  @param file cabinet file
+     *  @param addr address from which to read cabinet item
      */
-    public CabinetItem(byte[] array) {
-        content = array;
+    public CabinetItem(RandomAccessFile file, int addr) throws IOException {
+        pfcFile = file;
+        address = addr;
+
+        // Read the content from the given address
+        byte[] content = readContent();
 
         // Parse content, and set type and pointers.
         type = UNKNOWN;
@@ -166,6 +178,24 @@ public class CabinetItem {
         }
     }
 
+    private byte[] readContent() throws IOException {
+        byte[] content;
+        if (address != 0) {
+            // Get item length.
+            pfcFile.seek(address + 4);
+            int len = IntUtil.reverseInt(pfcFile.readInt());
+
+            // Read entire item into byte array.
+            content = new byte[len];
+            pfcFile.read(content);
+        } else {
+            // Create empty byte array for zero entry.
+            content = new byte[4];
+        }
+        length = content.length;
+        return content;
+    }
+
     public void setIndex(int idx) {
         index = idx;
     }
@@ -183,7 +213,7 @@ public class CabinetItem {
     }
 
     public int getLength() {
-        return content.length;
+        return length;
     }
 
     public int getType() {
@@ -203,7 +233,13 @@ public class CabinetItem {
     }
 
     public byte[] getContent() {
-        return content;
+        try {
+            return readContent();
+        } catch (IOException ex) {
+            // might need a better way of reporting any problems here...
+            ex.printStackTrace();
+            return null;
+        }
     }
 
     public byte getFlags() {
@@ -245,6 +281,10 @@ public class CabinetItem {
      *  Returns envelope label for item, or empty string if not an envelope.
      */
     public String toString() {
+        byte content[] = getContent();
+        if (content == null) {
+            return "";
+        }
         if (envelope) {
             StringBuffer label = new StringBuffer();
             for (int i = 18; i < (content.length - 18); i++) {
