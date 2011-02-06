@@ -154,7 +154,7 @@
         <jar destfile="${dist.dir}/${src.jar}" 
              basedir="." 
              compress="true">
-            <zipfileset dir="${src.dir}" prefix="src" excludes="**/*.form" />
+            <zipfileset dir="${src.dir}" prefix="src" />
             <zipfileset dir="${proj.dir}" prefix="nbproject" />
             <include name="build.xml" />
             <include name="LICENSE.txt" />

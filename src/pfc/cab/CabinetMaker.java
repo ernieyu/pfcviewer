@@ -38,7 +38,7 @@ public class CabinetMaker implements Runnable {
     
     public static final String CABFILE_ID = "AOLVM100";
 
-    RandomAccessFile pfcFile = null;
+    private RandomAccessFile pfcFile;
     private Cabinet cabinet;
     private int progressPct;
     private JProgressBar progressBar;

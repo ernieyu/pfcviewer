@@ -21,7 +21,6 @@
  */
 
 import java.io.*;
-import java.util.*;
 import pfc.cab.*;
 import pfc.export.*;
 
@@ -35,6 +34,7 @@ import pfc.export.*;
  */
 public class MailToMbox {
     
+    private RandomAccessFile pfcFile;
     private Cabinet cabinet;
     
     /** Creates a new instance of MailToMbox */
@@ -64,6 +64,7 @@ public class MailToMbox {
         MailToMbox converter = new MailToMbox();
         converter.openCabinet(args[0]);
         converter.exportMail(args[1]);
+        converter.closeCabinet();
     }
 
     /**
@@ -72,7 +73,6 @@ public class MailToMbox {
      */
     private void openCabinet(String pfcName) {
         // Open PFC file for reading
-        RandomAccessFile pfcFile = null;
         try {
             pfcFile = new RandomAccessFile(pfcName, "r");
         } catch (FileNotFoundException ex) {
@@ -110,6 +110,17 @@ public class MailToMbox {
                 System.out.println(exception.toString());
             }
             System.exit(1);
+        }
+    }
+
+    /**
+     * Closes cabinet file.
+     */
+    private void closeCabinet() {
+        if (pfcFile != null) {
+            try {
+                pfcFile.close();
+            } catch (IOException iox) {}
         }
     }
     

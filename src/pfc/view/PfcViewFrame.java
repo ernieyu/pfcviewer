@@ -24,7 +24,6 @@ package pfc.view;
 
 import java.io.*;
 import java.util.*;
-import java.awt.*;
 import java.awt.event.*;
 import javax.swing.*;
 import javax.swing.event.*;
@@ -41,8 +40,8 @@ import pfc.images.*;
  */
 public class PfcViewFrame extends javax.swing.JFrame {
     
-    private static final String VERSION = "Version 0.4";
-    private static final String VERSION_DATE = "30 Dec 2006";
+    private static final String VERSION = "Version 0.5";
+    private static final String VERSION_DATE = "5 Feb 2011";
     
     /** Creates new form PfcViewFrame */
     public PfcViewFrame() {
@@ -296,8 +295,13 @@ public class PfcViewFrame extends javax.swing.JFrame {
      *  arguments.
      */
     public void display(String filename) {
+        // Initialize menu state.
         enableMenuItems();
+        // Center window on screen.
+        setLocationRelativeTo(null);
+        // Display application window.
         setVisible(true);
+        // Open cabinet file if specified.
         if (filename != null) { 
             ((FileOpenAction) fileOpenAction).openCabinetFile(filename);
         }
